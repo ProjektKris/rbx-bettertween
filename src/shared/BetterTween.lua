@@ -1,31 +1,38 @@
+--!nocheck
 local TweenService = game:GetService("TweenService")
 
-type Array<T> = {[number]: T}
-export type TweenController = {
+export type BetterTweenClass = {
+	-- properties
 	Instance: Instance,
 	Tween: Tween,
+	Playing: boolean,
+	Completed: RBXScriptSignal,
 
-	Completed: any,
-
-	_Connections: Array<RBXScriptConnection>,
+	-- methods/functions
+	new: (instance: Instance) -> BetterTweenClass,
+	SetTarget: (targetValues: any, tweenInfo: TweenInfo) -> (),
+	Play: () -> (),
+	Stop: () -> (),
 }
 
 local BetterTween = {}
 BetterTween.__index = BetterTween
 
 -- constructor
-function BetterTween.new(instance: Instance)
+function BetterTween.new(instance: Instance): BetterTweenClass
 	-- checks
 	assert(instance, "Missing argument #1 to betterTween.new;")
 	assert(
-		typeof(instance) == "Instance", 
+		typeof(instance) == "Instance",
 		("Bad argument #1 to betterTween.new; Expected 'Instance', got '%s';"):format(typeof(instance))
 	)
 
-	local self = {
+	local self: BetterTweenClass = {
 		Instance = instance,
 		Tween = nil,
 		Playing = false,
+
+		Completed = nil,
 	}
 	setmetatable(self, BetterTween)
 	return self
@@ -56,8 +63,9 @@ function BetterTween:Play()
 end
 
 function BetterTween:Stop()
+	self.Playing = false
 	self.Tween:Cancel()
-	self.Tween = nil
+	-- self.Tween = nil
 end
 
 return BetterTween
